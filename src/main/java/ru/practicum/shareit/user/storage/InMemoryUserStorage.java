@@ -77,7 +77,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User deleteUser(Long userId) {
 
-        if ( !users.containsKey(userId)) {
+        if (!users.containsKey(userId)) {
 
             throw new EntityNotFoundException("Пользователь не существует");
         }
