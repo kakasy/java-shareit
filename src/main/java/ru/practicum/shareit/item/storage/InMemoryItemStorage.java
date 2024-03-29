@@ -7,10 +7,7 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +31,10 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item updateItem(Item item) {
 
+        final String itemName = items.get(item.getId()).getName();
+        final String itemDescription = items.get(item.getId()).getDescription();
+        final Boolean itemAvailable = items.get(item.getId()).getAvailable();
+
         if (!items.containsKey(item.getId())) {
 
             throw new EntityNotFoundException("Вещь не существует");
@@ -45,16 +46,16 @@ public class InMemoryItemStorage implements ItemStorage {
         }
 
 
-        if (item.getName() == null) {
-            item.setName(items.get(item.getId()).getName());
+        if (item.getName() == null || item.getName().isBlank()) {
+            item.setName(itemName);
         }
 
-        if (item.getDescription() == null) {
-            item.setDescription(items.get(item.getId()).getDescription());
+        if (item.getDescription() == null || item.getName().isBlank()) {
+            item.setDescription(itemDescription);
         }
 
         if (item.getAvailable() == null) {
-            item.setAvailable(items.get(item.getId()).getAvailable());
+            item.setAvailable(itemAvailable);
         }
 
         items.put(item.getId(), item);
@@ -80,7 +81,7 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item getItemById(Long itemId) {
+    public Optional<Item> getItemById(Long itemId) {
 
         if (!items.containsKey(itemId)) {
 
@@ -92,7 +93,7 @@ public class InMemoryItemStorage implements ItemStorage {
             throw new ValidationException("Неправильный аргумент");
         }
 
-        return items.get(itemId);
+        return Optional.of(items.get(itemId));
     }
 
     @Override
@@ -106,6 +107,10 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public List<Item> getItemsBySearchQuery(String text) {
+
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
 
         List<Item> validItems = new ArrayList<>();
 
