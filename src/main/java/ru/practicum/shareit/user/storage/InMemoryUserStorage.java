@@ -7,10 +7,7 @@ import ru.practicum.shareit.exception.UserAlreadyExistException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -28,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
 
                 Long currId = ++userIdGen;
                 user.setId(currId);
-                }
+            }
 
             users.put(user.getId(), user);
             log.info("Пользователь с id={} создан", user.getId());
@@ -43,6 +40,9 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
 
+        final String userName = users.get(user.getId()).getName();
+        final String userEmail = users.get(user.getId()).getEmail();
+
         if (!users.containsKey(user.getId())) {
 
             throw new EntityNotFoundException("Пользователь не существует");
@@ -54,16 +54,18 @@ public class InMemoryUserStorage implements UserStorage {
         }
 
 
-        if (user.getName() == null) {
-            user.setName(users.get(user.getId()).getName());
-        }
-        if (user.getEmail() == null) {
-            user.setEmail(users.get(user.getId()).getEmail());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(userName);
         }
 
         if (users.values().stream()
                 .filter(u -> u.getEmail().equals(user.getEmail()))
                 .allMatch(u -> u.getId().equals(user.getId()))) {
+
+            if (user.getEmail() == null || user.getEmail().isBlank()) {
+
+                user.setEmail(userEmail);
+            }
 
             users.put(user.getId(), user);
 
@@ -91,19 +93,19 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Long userId) {
-
-        if (!users.containsKey(userId)) {
-
-            throw new EntityNotFoundException("Пользователь не существует");
-        }
+    public Optional<User> getUserById(Long userId) {
 
         if (userId == null) {
 
             throw new ValidationException("Неправилььный аргумент");
         }
 
-        return users.get(userId);
+        if (!users.containsKey(userId)) {
+
+            throw new EntityNotFoundException("Пользователь не существует");
+        }
+
+        return Optional.of(users.get(userId));
 
     }
 
