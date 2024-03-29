@@ -3,7 +3,6 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.IntegrityService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -19,20 +18,13 @@ public class ItemController {
     private static final String OWNER_ID = "X-Sharer-User-Id";
 
     private final ItemService itemService;
-    private final IntegrityService integrityService;
 
     @PostMapping
     public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER_ID) Long ownerId) {
 
         log.info("POST-запрос: '/items' на создание вещи владельцем с id={}", ownerId);
 
-        ItemDto newItem = null;
-        if (integrityService.isUserExist(ownerId)) {
-            newItem = itemService.createItemDto(itemDto, ownerId);
-        }
-
-        return newItem;
-
+        return itemService.createItemDto(itemDto, ownerId);
     }
 
     @PatchMapping("/{itemId}")
@@ -40,12 +32,7 @@ public class ItemController {
 
         log.info("PATCH-запрос: '/items/{itemId}' на обновление вещи с id={}", itemId);
 
-        ItemDto updatedItem = null;
-        if (integrityService.isUserExist(ownerId)) {
-            updatedItem = itemService.updateItemDto(itemDto, ownerId, itemId);
-        }
-
-        return updatedItem;
+        return itemService.updateItemDto(itemDto, ownerId, itemId);
     }
 
 
