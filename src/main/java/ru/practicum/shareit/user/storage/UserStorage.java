@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.storage;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserStorage {
 
@@ -12,7 +13,7 @@ public interface UserStorage {
 
     User deleteUser(Long userId);
 
-    User getUserById(Long userId);
+    Optional<User> getUserById(Long userId);
 
     List<User> getUsers();
 
