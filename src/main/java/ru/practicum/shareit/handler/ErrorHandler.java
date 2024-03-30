@@ -23,9 +23,9 @@ public class ErrorHandler {
     }
 
 
-    @ExceptionHandler
+    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
+    public ErrorResponse handleValidationException(final RuntimeException e) {
 
         log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
@@ -44,14 +44,6 @@ public class ErrorHandler {
     public ErrorResponse handleOtherExceptions(final Throwable e) {
 
         log.debug("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationMethodException(final MethodArgumentNotValidException e) {
-
-        log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 }
