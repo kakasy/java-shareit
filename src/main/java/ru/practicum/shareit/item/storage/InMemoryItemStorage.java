@@ -31,53 +31,38 @@ public class InMemoryItemStorage implements ItemStorage {
     @Override
     public Item updateItem(Item item) {
 
-        final String itemName = items.get(item.getId()).getName();
-        final String itemDescription = items.get(item.getId()).getDescription();
-        final Boolean itemAvailable = items.get(item.getId()).getAvailable();
-
-        if (!items.containsKey(item.getId())) {
-
+        Item updatedItem = items.get(item.getId());
+        if (updatedItem == null) {
             throw new EntityNotFoundException("Вещь не существует");
         }
 
-        if (item.getId() == null) {
-
-            throw new ValidationException("Неверный аргумент");
+        final String name = item.getName();
+        if (name != null && !name.isBlank()) {
+            updatedItem.setName(name);
         }
 
-
-        if (item.getName() == null || item.getName().isBlank()) {
-            item.setName(itemName);
+        final String description = item.getDescription();
+        if (description != null && !description.isBlank()) {
+            updatedItem.setDescription(description);
         }
 
-        if (item.getDescription() == null || item.getName().isBlank()) {
-            item.setDescription(itemDescription);
+        final Boolean available = item.getAvailable();
+        if (available != null) {
+            updatedItem.setAvailable(available);
         }
 
-        if (item.getAvailable() == null) {
-            item.setAvailable(itemAvailable);
-        }
-
-        items.put(item.getId(), item);
-
-        return item;
+        return updatedItem;
 
     }
 
     @Override
     public Item deleteItem(Long itemId) {
 
-        if (!items.containsKey(itemId)) {
-
+        Item item = items.remove(itemId);
+        if (item == null) {
             throw new EntityNotFoundException("Вещь не существует");
         }
-
-        if (itemId == null) {
-
-            throw new ValidationException("Неправильный аргумент");
-        }
-
-        return items.remove(itemId);
+        return item;
     }
 
     @Override
@@ -93,7 +78,7 @@ public class InMemoryItemStorage implements ItemStorage {
             throw new ValidationException("Неправильный аргумент");
         }
 
-        return Optional.of(items.get(itemId));
+        return Optional.ofNullable(items.get(itemId));
     }
 
     @Override

@@ -40,56 +40,40 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
 
-        final String userName = users.get(user.getId()).getName();
-        final String userEmail = users.get(user.getId()).getEmail();
-
-        if (!users.containsKey(user.getId())) {
-
+        User updatedUser = users.get(user.getId());
+        if (updatedUser == null) {
             throw new EntityNotFoundException("Пользователь не существует");
         }
+        final String name = user.getName();
 
-        if (user.getId() == null) {
-
-            throw new ValidationException("Неправильный аргумент");
+        if (name != null && !name.isBlank()) {
+            updatedUser.setName(name);
         }
 
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(userName);
-        }
+        final String email = user.getEmail();
 
         if (users.values().stream()
-                .filter(u -> u.getEmail().equals(user.getEmail()))
+                .filter(u -> u.getEmail().equals(email))
                 .allMatch(u -> u.getId().equals(user.getId()))) {
 
-            if (user.getEmail() == null || user.getEmail().isBlank()) {
-
-                user.setEmail(userEmail);
+            if (email != null && !email.isBlank()) {
+                updatedUser.setEmail(email);
             }
-
-            users.put(user.getId(), user);
-
         } else {
-            throw new UserAlreadyExistException("Пользователь с email: " + user.getEmail() + " уже существует");
+            throw new UserAlreadyExistException("Пользователь с email: " + email + " уже существует");
         }
 
-        return user;
+        return updatedUser;
     }
 
     @Override
     public User deleteUser(Long userId) {
 
-        if (!users.containsKey(userId)) {
-
+        User user = users.remove(userId);
+        if (user == null) {
             throw new EntityNotFoundException("Пользователь не существует");
         }
-
-        if (userId == null) {
-
-            throw new ValidationException("Неправилььный аргумент");
-        }
-
-        return users.remove(userId);
+        return user;
     }
 
     @Override
@@ -105,7 +89,7 @@ public class InMemoryUserStorage implements UserStorage {
             throw new EntityNotFoundException("Пользователь не существует");
         }
 
-        return Optional.of(users.get(userId));
+        return Optional.ofNullable(users.get(userId));
 
     }
 
