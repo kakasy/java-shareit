@@ -23,8 +23,8 @@ public class BookingController {
     public BookingDtoResponse create(@RequestHeader(USER_HEADER) Long userId,
                                      @Valid @RequestBody BookingDtoRequest bookingDtoRequest) {
 
-        log.info("POST-запрос '/bookings' на создание запроса на бронирование: {} пользователем с id: {}"
-                , bookingDtoRequest, userId);
+        log.info("POST-запрос '/bookings' на создание запроса на бронирование: {} пользователем с id: {}",
+                bookingDtoRequest, userId);
         return bookingService.createBooking(userId, bookingDtoRequest);
     }
 

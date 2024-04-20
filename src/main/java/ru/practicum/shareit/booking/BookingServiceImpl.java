@@ -91,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
 
 
-        if (!booking.getBooker().getId().equals(userId) &&!booking.getItem().getOwner().getId().equals(userId)) {
+        if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
             throw new BookingException("Только владелец вещи или создатель запроса может посмотреть запрос");
         }
 
