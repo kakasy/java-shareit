@@ -41,7 +41,7 @@ public class BookingServiceImpl implements BookingService {
                         new EntityNotFoundException("Вещь с id=" + bookingDtoRequest.getItemId() + " не существует"));
 
         if (!bookingItem.getAvailable()) {
-            throw new ValidationException("Вещь недоступна для бронирования");
+            throw new ValidationException("Вещь с id=" + bookingItem.getId() + " недоступна для бронирования");
         }
 
         if (bookingItem.getOwner().getId().equals(booker.getId())) {
