@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
 import ru.practicum.shareit.Update;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
@@ -44,11 +43,11 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public UserDto delete(@PathVariable Long userId) {
+    public void delete(@PathVariable Long userId) {
 
         log.info("DELETE-запрос: '/users/{userId}' на удаление пользователя с id={}", userId);
 
-        return userService.deleteUserDto(userId);
+        userService.deleteUserDto(userId);
     }
 
     @GetMapping

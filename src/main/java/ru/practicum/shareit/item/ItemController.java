@@ -2,9 +2,14 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.Create;
+import ru.practicum.shareit.Update;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
+import ru.practicum.shareit.item.comment.dto.CommentShortDto;
+import ru.practicum.shareit.item.dto.ItemShortDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -15,12 +20,13 @@ import java.util.List;
 @RequestMapping("/items")
 public class ItemController {
 
-    private static final String OWNER_ID = "X-Sharer-User-Id";
+    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER_ID) Long ownerId) {
+    public ItemShortDto create(@RequestHeader(USER_HEADER) Long ownerId,
+                               @Validated(Create.class) @RequestBody ItemShortDto itemDto) {
 
         log.info("POST-запрос: '/items' на создание вещи владельцем с id={}", ownerId);
 
@@ -28,7 +34,9 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId, @RequestHeader(OWNER_ID) Long ownerId) {
+    public ItemShortDto update(@RequestHeader(USER_HEADER) Long ownerId,
+                               @Validated(Update.class) @RequestBody ItemShortDto itemDto,
+                               @PathVariable Long itemId) {
 
         log.info("PATCH-запрос: '/items/{itemId}' на обновление вещи с id={}", itemId);
 
@@ -37,32 +45,38 @@ public class ItemController {
 
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemDtoById(@PathVariable Long itemId) {
+    public ItemResponseDto getItemDtoById(@RequestHeader(USER_HEADER) Long userId,
+                                          @PathVariable Long itemId) {
 
         log.info("GET-запрос: '/items/{itemId}' на получение вещи с id={}", itemId);
 
-        return itemService.getItemDtoById(itemId);
+        return itemService.getItemDtoById(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getOwnerItems(@RequestHeader(OWNER_ID) Long ownerId) {
+    public List<ItemResponseDto> getOwnerItems(@RequestHeader(USER_HEADER) Long ownerId) {
 
         log.info("GET-запрос: '/items' на получение всех вещей владельца с id={}", ownerId);
 
-        return itemService.getOwnerItems(ownerId);
-    }
-
-    @DeleteMapping("/{itemId}")
-    public ItemDto deleteItemDto(@PathVariable Long itemId, @RequestHeader(OWNER_ID) Long ownerId) {
-
-        log.info("DELETE-запрос: '/items/{itemId}' на удаление вещи с id={}", itemId);
-
-        return itemService.deleteItemDto(itemId, ownerId);
+        return itemService.getAllOwnerItems(ownerId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsBySearchQuery(@RequestParam String text) {
+    public List<ItemShortDto> getItemsBySearchQuery(@RequestParam String text) {
+
         log.info("GET-запрос: '/items/search' на поиск вещи с текстом={}", text);
+
         return itemService.getItemsBySearchQuery(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader(USER_HEADER) Long userId,
+                                    @PathVariable Long itemId,
+                                    @Valid @RequestBody CommentShortDto commentShortDto) {
+
+        log.info("POST-запрос: '/{itemId}/comment' на создание комментария" +
+                " пользователем с id={} для вещи с id={}, текст комментария:{}", userId, itemId, commentShortDto);
+
+        return itemService.createComment(userId, itemId, commentShortDto);
     }
 }

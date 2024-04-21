@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.shareit.exception.BookingException;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 
@@ -23,9 +24,9 @@ public class ErrorHandler {
     }
 
 
-    @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final RuntimeException e) {
+    public ErrorResponse handleNotValidArgumentException(final MethodArgumentNotValidException e) {
 
         log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
@@ -44,6 +45,22 @@ public class ErrorHandler {
     public ErrorResponse handleOtherExceptions(final Throwable e) {
 
         log.debug("Получен статус 500 Internal Server Error {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+
+        log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler(BookingException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleBookingException(final BookingException e) {
+
+        log.debug("Получен статус 404 Not Found {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
 }
