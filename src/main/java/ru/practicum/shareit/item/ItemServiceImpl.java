@@ -13,6 +13,9 @@ import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.dto.CommentShortDto;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.pagination.Pagination;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -30,6 +33,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final RequestRepository requestRepository;
     private final CommentMapper commentMapper;
 
 
@@ -38,6 +42,11 @@ public class ItemServiceImpl implements ItemService {
 
         User itemOwner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не существует"));
+
+        if (itemShortDto.getRequestId() != null) {
+            ItemRequest itemRequest = requestRepository.findById(itemShortDto.getRequestId())
+                    .orElseThrow(() -> new EntityNotFoundException("Запрос с id=" + itemShortDto.getRequestId() + " не существует"));
+        }
 
         Item createdItem = itemRepository.save(ItemMapper.toItem(itemShortDto, itemOwner));
 
@@ -99,9 +108,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> getAllOwnerItems(Long ownerId) {
+    public List<ItemResponseDto> getAllOwnerItems(Long ownerId, Integer from, Integer size) {
 
-        Map<Long, Item> itemsMap = itemRepository.findAllItemsByOwnerId(ownerId)
+        Map<Long, Item> itemsMap = itemRepository.findAllItemsByOwnerId(ownerId, Pagination.withoutSort(from, size))
                 .stream()
                 .collect(Collectors.toMap(Item::getId, Function.identity()));
 
@@ -118,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemShortDto> getItemsBySearchQuery(String text) {
+    public List<ItemShortDto> getItemsBySearchQuery(String text, Integer from, Integer size) {
 
         if (!text.isBlank()) {
             text = text.toLowerCase();
@@ -128,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return itemRepository.getItemsBySearchQuery(text)
+        return itemRepository.getItemsBySearchQuery(text, Pagination.withoutSort(from, size))
                 .stream()
                 .map(ItemMapper::toItemShortDto)
                 .collect(Collectors.toList());
