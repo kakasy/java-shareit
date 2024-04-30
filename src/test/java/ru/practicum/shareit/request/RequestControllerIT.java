@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -52,6 +51,7 @@ public class RequestControllerIT {
     
     @BeforeEach
     void startUp() {
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(itemRequestController)
                 .build();
@@ -69,7 +69,7 @@ public class RequestControllerIT {
     @SneakyThrows
     @Test
     void createItemRequest_whenValidItemRequest_thenReturnItemRequest() {
-        
+
         ItemRequestDto requestDto = ItemRequestDto.builder()
                 .description("description")
                 .build();
@@ -87,7 +87,7 @@ public class RequestControllerIT {
 
     @SneakyThrows
     @Test
-    void createItemRequest_whenEmptyItemRequest_thenReturnBadRequest()  {
+    void createItemRequest_whenEmptyItemRequest_thenReturnBadRequest() {
 
         ItemRequestDto invalidRequest = ItemRequestDto.builder()
                 .description("")

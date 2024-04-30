@@ -300,7 +300,7 @@ public class ItemServiceTest {
         when(bookingRepository.existsByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(),
                 any(LocalDateTime.class))).thenReturn(true);
 
-        CommentDto actualComment = itemService.createComment(user.getId(), item.getId() ,new CommentShortDto());
+        CommentDto actualComment = itemService.createComment(user.getId(), item.getId(), new CommentShortDto());
 
         assertEquals(CommentMapper.toCommentDto(testComment), actualComment);
         verify(userRepository, times(1)).findById(user.getId());
