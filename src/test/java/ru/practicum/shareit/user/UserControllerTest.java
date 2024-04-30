@@ -14,9 +14,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -26,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @ExtendWith(MockitoExtension.class)
-public class UserControllerIT {
+public class UserControllerTest {
+
     @InjectMocks
     private UserController userController;
 
@@ -75,7 +78,13 @@ public class UserControllerIT {
                 .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)));
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id", is(firstUser.getId()), Long.class))
+                .andExpect(jsonPath("$[0].name", is(firstUser.getName())))
+                .andExpect(jsonPath("$[0].email", is(firstUser.getEmail())))
+                .andExpect(jsonPath("$[1].id", is(secondUser.getId()), Long.class))
+                .andExpect(jsonPath("$[1].name", is(secondUser.getName())))
+                .andExpect(jsonPath("$[1].email", is(secondUser.getEmail())));
 
         verify(userService, times(1)).getUsersDto();
     }
@@ -112,6 +121,10 @@ public class UserControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userToCreate)))
                 .andExpect(status().isOk())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(firstUser.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(firstUser.getName())))
+                .andExpect(jsonPath("$.email", is(firstUser.getEmail())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -247,6 +260,9 @@ public class UserControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userToUpdate)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(firstUser.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(firstUser.getName())))
+                .andExpect(jsonPath("$.email", is(firstUser.getEmail())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -340,6 +356,9 @@ public class UserControllerIT {
                 .content(objectMapper.writeValueAsString(firstUser)))
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(firstUser.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(firstUser.getName())))
+                .andExpect(jsonPath("$.email", is(firstUser.getEmail())))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();

@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-public class ItemControllerIT {
+public class ItemControllerTest {
 
     @Autowired
     private final ObjectMapper objectMapper = new ObjectMapper();

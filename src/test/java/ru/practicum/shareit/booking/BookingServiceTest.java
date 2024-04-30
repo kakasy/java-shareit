@@ -96,9 +96,12 @@ public class BookingServiceTest {
                 .end(LocalDateTime.of(2025,1,15,13,20,0))
                 .build();
 
-        booking = new Booking(1L,LocalDateTime.of(2025,1,1,11,20,0),
-                LocalDateTime.of(2025,1,15,13,20,0),
-                item, user, BookingStatus.WAITING);
+        booking = BookingMapper.toBooking(bookingRequest, item, user, BookingStatus.WAITING);
+        booking.setId(1L);
+
+//        booking = new Booking(1L,LocalDateTime.of(2025,1,1,11,20,0),
+//                LocalDateTime.of(2025,1,15,13,20,0),
+//                item, user, BookingStatus.WAITING);
     }
 
     @Test
@@ -221,10 +224,27 @@ public class BookingServiceTest {
 
     }
 
+//    @Test
+//    void approvedBooking_whenBookingStatusIsReject_thenReturnException() {
+//
+//        booking.setStatus(BookingStatus.REJECTED);
+////        booking.setId(1L);
+//        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+//
+//        assertThrows(BookingException.class,
+//                () -> bookingService.approveBooking(owner.getId(), 1L, false));
+//
+////        BookingStatus actual = booking.getStatus();
+////
+////        assertEquals(actual, BookingStatus.REJECTED);
+//        verify(bookingRepository, times(1)).findById(booking.getId());
+//        verify(bookingRepository, never()).save(booking);
+//    }
+
     @Test
     void approvedBooking_whenUserIsNotOwner_thenExceptionThrown() {
 
-        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
 
         assertThrows(BookingException.class,
                 () -> bookingService.approveBooking(user.getId(), booking.getId(), true));
