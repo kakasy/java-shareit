@@ -55,7 +55,7 @@ public class BookingControllerIT {
     private static final String USER_HEADER = "X-Sharer-User-Id";
 
     @BeforeEach
-    void init() {
+    void startUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(bookingController)
                 .build();
