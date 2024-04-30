@@ -48,7 +48,7 @@ public class RequestControllerIT {
     private ItemRequestResponseDto responseDto;
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
-    
+
     @BeforeEach
     void startUp() {
 
