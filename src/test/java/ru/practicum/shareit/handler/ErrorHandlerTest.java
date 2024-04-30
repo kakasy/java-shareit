@@ -20,6 +20,7 @@ public class ErrorHandlerTest {
 
     @Test
     void handleEntityNotFoundException() {
+
         EntityNotFoundException notFoundException = new EntityNotFoundException("Entity not found");
 
         ErrorResponse response = errorHandler.handleEntityNotFoundException(notFoundException);
