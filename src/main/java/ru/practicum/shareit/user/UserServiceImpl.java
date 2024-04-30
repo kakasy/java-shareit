@@ -1,11 +1,9 @@
 package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.UserAlreadyExistException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
@@ -13,78 +11,66 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
-
 
     @Override
     public UserDto createUserDto(UserDto userDto) {
 
-        try {
-            return userMapper.toUserDto(userRepository.save(userMapper.toUser(userDto)));
+        User userToCreate = userRepository.save(UserMapper.toUser(userDto));
 
-        } catch (DataIntegrityViolationException e) {
-            throw new UserAlreadyExistException("Пользователь с email:" + userDto.getEmail() + " уже существует");
-        }
-
+        return UserMapper.toUserDto(userToCreate);
     }
 
     @Override
     public UserDto updateUserDto(UserDto userDto, Long userId) {
 
-        userDto.setId(userId);
-
-        User updatedUser = userRepository.findById(userId)
+        User userToUpdate = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
 
-        final String name = userDto.getName();
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
 
-        if (name != null && !name.isBlank()) {
-            updatedUser.setName(name);
+            userToUpdate.setName(userDto.getName());
         }
 
-        final String email = userDto.getEmail();
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
 
-        if (userRepository.findByEmail(email)
-                .stream()
-                .filter(u -> u.getEmail().equals(email))
-                .allMatch(u -> u.getId().equals(userDto.getId()))) {
-
-            if (email != null && !email.isBlank()) {
-                updatedUser.setEmail(email);
-            }
-        } else {
-            throw new UserAlreadyExistException("Пользователь с email: " + email + " уже существует");
+            userToUpdate.setEmail(userDto.getEmail());
         }
-        return userMapper.toUserDto(userRepository.save(updatedUser));
+
+        userToUpdate.setId(userId);
+        userRepository.save(userToUpdate);
+
+        return UserMapper.toUserDto(userToUpdate);
+
     }
 
     @Override
     public void deleteUserDto(Long userId) {
 
-        try {
-            userRepository.deleteById(userId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new EntityNotFoundException("Пользователь с id=" + userId + " не найден");
-        }
+        User userToDelete = userRepository.findById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
 
+        userRepository.deleteById(userToDelete.getId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserDtoById(Long userId) {
 
-        return userMapper.toUserDto(userRepository.findById(userId)
+        return UserMapper.toUserDto(userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден")));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getUsersDto() {
 
          return userRepository.findAll()
                 .stream()
-                .map(userMapper::toUserDto)
+                .map(UserMapper::toUserDto)
                 .collect(Collectors.toList());
     }
 }

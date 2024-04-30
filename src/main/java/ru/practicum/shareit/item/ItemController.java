@@ -20,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
+@Validated
 public class ItemController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";

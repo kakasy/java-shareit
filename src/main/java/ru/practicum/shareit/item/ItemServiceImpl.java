@@ -34,7 +34,6 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final RequestRepository requestRepository;
-    private final CommentMapper commentMapper;
 
 
     @Override
@@ -57,25 +56,23 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemShortDto updateItemDto(ItemShortDto itemShortDto, Long ownerId, Long itemId) {
 
-        User itemOwner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не существует"));
-
-        Item itemToUpdate = itemRepository.findByIdWithUser(itemId, ownerId)
+        Item itemToUpdate = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException("Вещь с id=" + itemId +  " не найдена"));
-
 
         if (!itemToUpdate.getOwner().getId().equals(ownerId)) {
             throw new EntityNotFoundException("У пользователя такой вещи не существует");
         }
 
-        if (itemShortDto.getAvailable() != null) {
-            itemToUpdate.setAvailable(itemShortDto.getAvailable());
-        }
         if (itemShortDto.getName() != null && !itemShortDto.getName().isBlank()) {
             itemToUpdate.setName(itemShortDto.getName());
         }
+
         if (itemShortDto.getDescription() != null && !itemShortDto.getDescription().isBlank()) {
             itemToUpdate.setDescription(itemShortDto.getDescription());
+        }
+
+        if (itemShortDto.getAvailable() != null) {
+            itemToUpdate.setAvailable(itemShortDto.getAvailable());
         }
 
         itemRepository.save(itemToUpdate);
@@ -93,7 +90,7 @@ public class ItemServiceImpl implements ItemService {
         List<CommentDto> comments = commentRepository
                 .findAllByItemId(itemId)
                 .stream()
-                .map(commentMapper::toCommentDto)
+                .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
 
         if (item.getOwner().getId().equals(userId)) {
@@ -149,24 +146,21 @@ public class ItemServiceImpl implements ItemService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не существует"));
 
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Вещь с id=" + itemId + " не существует"));
-
         Boolean isBookings = bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
 
         if (!isBookings) {
             throw new ValidationException("Нет бронирований вещей");
         }
 
-        Comment comment = commentRepository.save(commentMapper.toComment(commentShortDto, user, itemId));
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentShortDto, user, itemId));
 
-        return commentMapper.toCommentDto(comment);
+        return CommentMapper.toCommentDto(comment);
     }
 
     private ItemResponseDto addComments(Item item, List<Comment> comments) {
         List<CommentDto> commentList = comments
                 .stream()
-                .map(commentMapper::toCommentDto)
+                .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
 
         return ItemMapper.toItemResponseDto(item, commentList);

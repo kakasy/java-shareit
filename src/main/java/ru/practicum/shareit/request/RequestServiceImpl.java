@@ -14,7 +14,6 @@ import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @RequiredArgsConstructor
-@Slf4j
 public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
@@ -47,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestResponseDto> getRequestsByOwner(Long ownerId, Integer from, Integer size) {
 
-        User owner = userRepository.findById(ownerId)
+        userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не найден"));
 
         List<ItemRequest> itemRequests = requestRepository.findAllByRequestorId(ownerId,
@@ -60,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestResponseDto> getAllRequests(Long userId, Integer from, Integer size) {
 
-        User requester = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
 
         List<ItemRequest> requests = requestRepository.findAllByRequestorIdNot(userId,
@@ -71,16 +69,15 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public ItemRequestResponseDto getRequestById(Long userId, Long requestId) {
+    public ItemRequestResponseDto getRequestsById(Long userId, Long requestId) {
 
-        User requester = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
 
         ItemRequest itemRequest = requestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException("Запрос с id=" + requestId + " не найден"));
 
         List<ItemForRequestDto> items = itemRepository.findAllByRequestId(requestId);
-
 
         return RequestMapper.toItemRequestResponseDto(itemRequest, items);
 
@@ -93,7 +90,7 @@ public class RequestServiceImpl implements RequestService {
                 .collect(Collectors.toMap(ItemRequest::getId, Function.identity()));
 
         Map<Long, List<ItemForRequestDto>> items =
-                itemRepository.findAllByRequestIdIn(new ArrayList<>(requests.keySet()))
+                itemRepository.findAllByRequestIdIn(requests.keySet())
                         .stream()
                         .collect(Collectors.groupingBy(ItemForRequestDto::getRequestId));
 

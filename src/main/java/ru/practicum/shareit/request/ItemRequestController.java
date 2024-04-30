@@ -54,13 +54,13 @@ public class ItemRequestController {
         return requestService.getAllRequests(userId, from, size);
     }
 
-    @GetMapping("/requestId")
-    public ItemRequestResponseDto getRequestById(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long requestId) {
+    @GetMapping("/{requestId}")
+    public ItemRequestResponseDto getRequestsById(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long requestId) {
 
         log.info("GET-запрос: '/requests/{requestId}' на получение запроса с id:{}  пользователем с id={}",
                 requestId, userId);
 
-        return requestService.getRequestById(userId, requestId);
+        return requestService.getRequestsById(userId, requestId);
     }
 
 }

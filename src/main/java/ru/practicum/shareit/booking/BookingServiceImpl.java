@@ -58,9 +58,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDtoResponse approveBooking(Long userId, Long bookingId, Boolean isApproved) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
-
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
 
@@ -84,9 +81,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional(readOnly = true)
     public BookingDtoResponse getBookingById(Long userId, Long bookingId) {
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));

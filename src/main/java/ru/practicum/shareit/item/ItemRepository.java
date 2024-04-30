@@ -8,10 +8,9 @@ import ru.practicum.shareit.item.dto.ItemForRequestDto;
 
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-
 
     List<Item> findAllItemsByOwnerId(Long userId, Pageable pageable);
 
@@ -20,10 +19,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             " and i.available = true")
     List<Item> getItemsBySearchQuery(@Param("search") String text, Pageable pageable);
 
-    @Query("select i from Item i where i.id =?1 and i.owner.id =?2")
-    Optional<Item> findByIdWithUser(Long itemId, Long ownerId);
-
-    List<ItemForRequestDto> findAllByRequestIdIn(List<Long> requestIds);
+    List<ItemForRequestDto> findAllByRequestIdIn(Set<Long> requestIds);
 
     List<ItemForRequestDto> findAllByRequestId(Long requestId);
 }

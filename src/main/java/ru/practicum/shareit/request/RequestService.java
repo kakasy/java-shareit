@@ -13,6 +13,6 @@ public interface RequestService {
 
     List<ItemRequestResponseDto> getAllRequests(Long userId, Integer from, Integer size);
 
-    ItemRequestResponseDto getRequestById(Long userId, Long requestId);
+    ItemRequestResponseDto getRequestsById(Long userId, Long requestId);
 
 }
