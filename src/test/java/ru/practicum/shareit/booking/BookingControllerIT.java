@@ -22,12 +22,14 @@ import ru.practicum.shareit.user.dto.UserBookingDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -184,5 +186,24 @@ public class BookingControllerIT {
                 .getContentAsString();
 
         assertEquals(objectMapper.writeValueAsString(responseList), result);
+    }
+
+
+    @SneakyThrows
+    @Test
+    void getSortBookingByOwner_whenValidSortState_thenReturnList() {
+
+        List<BookingDtoResponse> responseList = List.of(bookingDtoResponse);
+
+        when(bookingService.getBookingsForUserItems(anyLong(), any(BookingState.class), anyInt(), anyInt()))
+                .thenReturn(responseList);
+
+        mockMvc.perform(get("/bookings/owner?state=ALL")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(USER_HEADER, "1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
     }
 }

@@ -92,29 +92,30 @@ public class BookingServiceTest {
 
         bookingRequest = BookingDtoRequest.builder()
                 .itemId(item.getId())
-                .start(LocalDateTime.now().plusHours(3L))
-                .end(LocalDateTime.now().plusDays(3L))
+                .start(LocalDateTime.of(2025,1,1,11,20,0))
+                .end(LocalDateTime.of(2025,1,15,13,20,0))
                 .build();
 
-        booking = new Booking(1L,LocalDateTime.now().plusHours(3),
-                LocalDateTime.now().plusDays(3), item, user, BookingStatus.WAITING);
+        booking = new Booking(1L,LocalDateTime.of(2025,1,1,11,20,0),
+                LocalDateTime.of(2025,1,15,13,20,0),
+                item, user, BookingStatus.WAITING);
     }
 
-//    @Test
-//    void createBooking_whenValidUserIdAndItemIsAvailable_thenReturnBooking() {
-//
-//        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-//        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
-//
-//        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
-//
-//        BookingDtoResponse actualBooking = bookingService.createBooking(user.getId(), bookingRequest);
-//        actualBooking.setId(1L);
-//
-//        assertEquals(BookingMapper.toBookingDtoResponse(booking), actualBooking);
-//        verify(userRepository, times(1)).findById(user.getId());
-//        verify(itemRepository, times(1)).findById(item.getId());
-//    }
+    @Test
+    void createBooking_whenValidUserIdAndItemIsAvailable_thenReturnBooking() {
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+
+        BookingDtoResponse actualBooking = bookingService.createBooking(user.getId(), bookingRequest);
+        actualBooking.setId(1L);
+
+        assertEquals(BookingMapper.toBookingDtoResponse(booking), actualBooking);
+        verify(userRepository, times(1)).findById(user.getId());
+        verify(itemRepository, times(1)).findById(item.getId());
+    }
 
     @Test
     void createBooking_whenInvalidUserId_thenExceptionThrown() {
