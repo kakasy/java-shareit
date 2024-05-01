@@ -15,9 +15,9 @@ public interface ItemService {
 
     ItemResponseDto getItemDtoById(Long itemId, Long userId);
 
-    List<ItemResponseDto> getAllOwnerItems(Long ownerId);
+    List<ItemResponseDto> getAllOwnerItems(Long ownerId, Integer from, Integer size);
 
-    List<ItemShortDto> getItemsBySearchQuery(String text);
+    List<ItemShortDto> getItemsBySearchQuery(String text, Integer from, Integer size);
 
     CommentDto createComment(Long userId, Long itemId, CommentShortDto commentShortDto);
 

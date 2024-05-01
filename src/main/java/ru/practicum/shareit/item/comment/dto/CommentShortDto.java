@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @Builder
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class CommentShortDto {
 
+    @Size(max = 512)
     @NotBlank
     private String text;
 }

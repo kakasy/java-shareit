@@ -12,12 +12,15 @@ import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
+@Validated
 public class ItemController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
@@ -54,19 +57,25 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemResponseDto> getOwnerItems(@RequestHeader(USER_HEADER) Long ownerId) {
+    public List<ItemResponseDto> getOwnerItems(@RequestHeader(USER_HEADER) Long ownerId,
+                                               @RequestParam(name = "from", defaultValue = "0")
+                                               @PositiveOrZero Integer from,
+                                               @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
 
         log.info("GET-запрос: '/items' на получение всех вещей владельца с id={}", ownerId);
 
-        return itemService.getAllOwnerItems(ownerId);
+        return itemService.getAllOwnerItems(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemShortDto> getItemsBySearchQuery(@RequestParam String text) {
+    public List<ItemShortDto> getItemsBySearchQuery(@RequestParam String text,
+                                                    @RequestParam(name = "from", defaultValue = "0")
+                                                    @PositiveOrZero Integer from,
+                                                    @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
 
         log.info("GET-запрос: '/items/search' на поиск вещи с текстом={}", text);
 
-        return itemService.getItemsBySearchQuery(text);
+        return itemService.getItemsBySearchQuery(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

@@ -30,4 +30,6 @@ public class ItemShortDto {
 
     @NotNull(groups = Create.class)
     private Boolean available;
+
+    private Long requestId;
 }

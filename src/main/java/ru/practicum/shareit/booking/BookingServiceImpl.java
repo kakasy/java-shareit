@@ -11,6 +11,7 @@ import ru.practicum.shareit.exception.EntityNotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.pagination.Pagination;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -34,14 +35,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse createBooking(Long userId, BookingDtoRequest bookingDtoRequest) {
 
         User booker = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователя с id= " + userId + " не существует"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id=%d не существует", userId)));
 
         Item bookingItem = itemRepository.findById(bookingDtoRequest.getItemId())
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Вещь с id=" + bookingDtoRequest.getItemId() + " не существует"));
+                        new EntityNotFoundException(String.format("Вещь с id=%d не существует", bookingDtoRequest.getItemId())));
 
         if (!bookingItem.getAvailable()) {
-            throw new ValidationException("Вещь с id=" + bookingItem.getId() + " недоступна для бронирования");
+            throw new ValidationException(String.format("Вещь с id=%d недоступна для бронирования", bookingItem.getId()));
         }
 
         if (bookingItem.getOwner().getId().equals(booker.getId())) {
@@ -57,11 +58,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDtoResponse approveBooking(Long userId, Long bookingId, Boolean isApproved) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
-
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Бронирование с id=%d не найдено", bookingId)));
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new BookingException("Нельзя подтверждать бронирование чужой вещи");
@@ -84,11 +82,8 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public BookingDtoResponse getBookingById(Long userId, Long bookingId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
-
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Бронирование с id=%d не найдено", bookingId)));
 
 
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
@@ -101,35 +96,41 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoResponse> getBookingsByCurrentUser(Long userId, BookingState bookingState) {
+    public List<BookingDtoResponse> getBookingsByCurrentUser(Long userId, BookingState bookingState, Integer from,
+                                                             Integer size) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         List<Booking> bookings;
 
         switch (bookingState) {
             case ALL:
-                bookings = bookingRepository.findAllByBookerId(userId, DESC_SORT);
+                bookings = bookingRepository.findAllByBookerId(userId, Pagination.withSort(from, size, DESC_SORT));
                 break;
             case WAITING:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING, DESC_SORT);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case APPROVED:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.APPROVED, DESC_SORT);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.APPROVED,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED, DESC_SORT);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByBookerIdAndEndBefore(userId, LocalDateTime.now(), DESC_SORT);
+                bookings = bookingRepository.findAllByBookerIdAndEndBefore(userId, LocalDateTime.now(),
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByBookerIdAndStartAfter(userId, LocalDateTime.now(), DESC_SORT);
+                bookings = bookingRepository.findAllByBookerIdAndStartAfter(userId, LocalDateTime.now(),
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case CURRENT:
                 bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(userId, LocalDateTime.now(),
-                        LocalDateTime.now(), DESC_SORT);
+                        LocalDateTime.now(), Pagination.withSort(from, size, DESC_SORT));
                 break;
             default:
                 throw new ValidationException(String.format("Unknown state: %s", bookingState));
@@ -143,38 +144,45 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookingDtoResponse> getBookingsForUserItems(Long ownerId, BookingState bookingState) {
+    public List<BookingDtoResponse> getBookingsForUserItems(Long ownerId, BookingState bookingState, Integer from,
+                                                            Integer size) {
 
         User user = userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + "не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", ownerId)));
 
         List<Booking> bookings;
 
         switch (bookingState) {
             case ALL:
-                bookings = bookingRepository.findAllByItemOwnerId(ownerId, DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerId(ownerId, Pagination.withSort(from, size, DESC_SORT));
                 break;
             case WAITING:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING, DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.WAITING,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case APPROVED:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.APPROVED, DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.APPROVED,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.REJECTED,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case CANCELED:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.CANCELLED, DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStatus(ownerId, BookingStatus.CANCELLED,
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, LocalDateTime.now(), DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndEndBefore(ownerId, LocalDateTime.now(),
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, LocalDateTime.now(), DESC_SORT);
+                bookings = bookingRepository.findAllByItemOwnerIdAndStartAfter(ownerId, LocalDateTime.now(),
+                        Pagination.withSort(from, size, DESC_SORT));
                 break;
             case CURRENT:
                 bookings = bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now(),
-                        LocalDateTime.now(), DESC_SORT);
+                        LocalDateTime.now(), Pagination.withSort(from, size, DESC_SORT));
                 break;
             default:
                 throw new ValidationException(String.format("Unknown state: %s", bookingState));

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,17 +23,18 @@ public class Comment {
     @Column(name = "id")
     private Long id;
 
+    @Size(max = 512)
     @Column(name = "text", nullable = false)
     private String text;
 
-    @Column(name = "item_id")
+    @Column(name = "item_id", nullable = false)
     private Long itemId;
 
     @OneToOne
     @JoinColumn(name = "author_id")
     private User author;
 
-    @Column(name = "created")
+    @Column(name = "created", nullable = false)
     private LocalDateTime created;
 
 }

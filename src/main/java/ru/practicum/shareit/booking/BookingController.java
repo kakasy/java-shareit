@@ -2,17 +2,21 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping(path = "/bookings")
+@Validated
 public class BookingController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
@@ -48,19 +52,23 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDtoResponse> getBookingsByCurrentUser(
-            @RequestHeader(USER_HEADER) Long userId, @RequestParam(defaultValue = "ALL") BookingState state) {
+            @RequestHeader(USER_HEADER) Long userId, @RequestParam(defaultValue = "ALL") BookingState state,
+            @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
 
         log.info("GET-запрос '/bookings' бронирований пользователя с id:{}, state:{}", userId, state);
 
-        return bookingService.getBookingsByCurrentUser(userId, state);
+        return bookingService.getBookingsByCurrentUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingsFortUserItems(
-            @RequestHeader(USER_HEADER) Long ownerId, @RequestParam(defaultValue = "ALL") BookingState state) {
+            @RequestHeader(USER_HEADER) Long ownerId, @RequestParam(defaultValue = "ALL") BookingState state,
+            @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
+            @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
 
         log.info("GET-запрос '/bookings/owner' ownerID:{}, state:{},", ownerId, state);
 
-        return bookingService.getBookingsForUserItems(ownerId, state);
+        return bookingService.getBookingsForUserItems(ownerId, state, from, size);
     }
 }
