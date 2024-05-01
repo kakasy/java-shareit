@@ -40,11 +40,13 @@ public class ItemServiceImpl implements ItemService {
     public ItemShortDto createItemDto(ItemShortDto itemShortDto, Long ownerId) {
 
         User itemOwner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не существует"));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Пользователь с id=%d не существует", ownerId)));
 
         if (itemShortDto.getRequestId() != null) {
             ItemRequest itemRequest = requestRepository.findById(itemShortDto.getRequestId())
-                    .orElseThrow(() -> new EntityNotFoundException("Запрос с id=" + itemShortDto.getRequestId() + " не существует"));
+                    .orElseThrow(() -> new EntityNotFoundException(
+                            String.format("Запрос с id=%d не существует", itemShortDto.getRequestId())));
         }
 
         Item createdItem = itemRepository.save(ItemMapper.toItem(itemShortDto, itemOwner));
@@ -57,7 +59,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemShortDto updateItemDto(ItemShortDto itemShortDto, Long ownerId, Long itemId) {
 
         Item itemToUpdate = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Вещь с id=" + itemId +  " не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
 
         if (!itemToUpdate.getOwner().getId().equals(ownerId)) {
             throw new EntityNotFoundException("У пользователя такой вещи не существует");
@@ -85,7 +87,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemResponseDto getItemDtoById(Long itemId, Long userId) {
 
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException("Вещь с id= " + itemId + " не найдена"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
 
         List<CommentDto> comments = commentRepository
                 .findAllByItemId(itemId)
@@ -144,7 +146,7 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto createComment(Long userId, Long itemId, CommentShortDto commentShortDto) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не существует"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не существует", userId)));
 
         Boolean isBookings = bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
 

@@ -35,14 +35,14 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse createBooking(Long userId, BookingDtoRequest bookingDtoRequest) {
 
         User booker = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователя с id= " + userId + " не существует"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id=%d не существует", userId)));
 
         Item bookingItem = itemRepository.findById(bookingDtoRequest.getItemId())
                 .orElseThrow(() ->
-                        new EntityNotFoundException("Вещь с id=" + bookingDtoRequest.getItemId() + " не существует"));
+                        new EntityNotFoundException(String.format("Вещь с id=%d не существует", bookingDtoRequest.getItemId())));
 
         if (!bookingItem.getAvailable()) {
-            throw new ValidationException("Вещь с id=" + bookingItem.getId() + " недоступна для бронирования");
+            throw new ValidationException(String.format("Вещь с id=%d недоступна для бронирования", bookingItem.getId()));
         }
 
         if (bookingItem.getOwner().getId().equals(booker.getId())) {
@@ -59,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse approveBooking(Long userId, Long bookingId, Boolean isApproved) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Бронирование с id=%d не найдено", bookingId)));
 
         if (!booking.getItem().getOwner().getId().equals(userId)) {
             throw new BookingException("Нельзя подтверждать бронирование чужой вещи");
@@ -83,7 +83,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDtoResponse getBookingById(Long userId, Long bookingId) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Бронирование с id=%d не найдено", bookingId)));
 
 
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
@@ -100,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
                                                              Integer size) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + "не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         List<Booking> bookings;
 
@@ -148,7 +148,7 @@ public class BookingServiceImpl implements BookingService {
                                                             Integer size) {
 
         User user = userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + "не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", ownerId)));
 
         List<Booking> bookings;
 

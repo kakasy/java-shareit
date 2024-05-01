@@ -33,7 +33,7 @@ public class RequestServiceImpl implements RequestService {
     public ItemRequestResponseDto createRequest(Long userId, ItemRequestDto itemRequestDto) {
 
         User requester = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         ItemRequest itemRequest = requestRepository.save(RequestMapper.toItemRequest(itemRequestDto, requester));
 
@@ -45,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ItemRequestResponseDto> getRequestsByOwner(Long ownerId, Integer from, Integer size) {
 
         userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", ownerId)));
 
         List<ItemRequest> itemRequests = requestRepository.findAllByRequestorId(ownerId,
                 Pagination.withSort(from, size, CREATED_DESC));
@@ -58,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ItemRequestResponseDto> getAllRequests(Long userId, Integer from, Integer size) {
 
         userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         List<ItemRequest> requests = requestRepository.findAllByRequestorIdNot(userId,
                 Pagination.withSort(from, size, CREATED_DESC));
@@ -71,10 +71,10 @@ public class RequestServiceImpl implements RequestService {
     public ItemRequestResponseDto getRequestsById(Long userId, Long requestId) {
 
         userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         ItemRequest itemRequest = requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Запрос с id=" + requestId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Запрос с id=%d не найден", requestId)));
 
         List<ItemForRequestDto> items = itemRepository.findAllByRequestId(requestId);
 

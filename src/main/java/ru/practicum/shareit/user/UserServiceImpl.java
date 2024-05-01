@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUserDto(UserDto userDto, Long userId) {
 
         User userToUpdate = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не найден", userId)));
 
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
 
@@ -51,7 +51,8 @@ public class UserServiceImpl implements UserService {
     public void deleteUserDto(Long userId) {
 
         User userToDelete = userRepository.findById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден"));
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                String.format("Пользователь с id=%d не найден", userId)));
 
         userRepository.deleteById(userToDelete.getId());
     }
@@ -61,7 +62,8 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserDtoById(Long userId) {
 
         return UserMapper.toUserDto(userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден")));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        String.format("Пользователь с id=%d не найден", userId))));
     }
 
     @Override
