@@ -52,7 +52,7 @@ public class ItemControllerTest {
     @SneakyThrows
     @Test
     void createItem_whenInvalidItemName_thenReturnBadRequest() {
-        
+
         itemShortDto = ItemShortDto.builder()
                 .name("")
                 .build();
@@ -74,7 +74,7 @@ public class ItemControllerTest {
     @SneakyThrows
     @Test
     void createItem_whenInvalidItemDescription_thenReturnBadRequest() {
-        
+
         itemShortDto = ItemShortDto.builder()
                 .description("")
                 .build();
@@ -94,7 +94,7 @@ public class ItemControllerTest {
     @SneakyThrows
     @Test
     void createItem_whenInvalidItemAvailable_thenReturnBadRequest() {
-        
+
         itemShortDto = ItemShortDto.builder()
                 .available(null)
                 .build();
@@ -125,7 +125,7 @@ public class ItemControllerTest {
                         "меньше, но покрытие каждого — больше. Мы предлагаем вам создать по одному интеграционному тесту\" +\n" +
                         "для каждого крупного метода в ваших сервисах. Например, для метода getUserItems в классе ItemServiceImpl.")
                 .build();
-        
+
 
         mockMvc.perform(patch("/items/{itemId}", id)
                         .content(objectMapper.writeValueAsString(itemShortDto))
@@ -142,13 +142,13 @@ public class ItemControllerTest {
     @SneakyThrows
     @Test
     void createComment_whenInvalidCommentSize_thenReturnBadRequest() {
-        
+
         Long id = 1L;
-        
+
         CommentShortDto commentRequest = CommentShortDto.builder()
                 .text("")
                 .build();
-        
+
 
         mockMvc.perform(post("/items/{itemId}/comment", id)
                         .content(objectMapper.writeValueAsString(commentRequest))
