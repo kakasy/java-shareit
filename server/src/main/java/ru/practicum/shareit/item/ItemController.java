@@ -9,9 +9,6 @@ import ru.practicum.shareit.item.comment.dto.CommentShortDto;
 import ru.practicum.shareit.item.dto.ItemShortDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
@@ -56,9 +53,8 @@ public class ItemController {
 
     @GetMapping
     public List<ItemResponseDto> getOwnerItems(@RequestHeader(USER_HEADER) Long ownerId,
-                                               @RequestParam(name = "from", defaultValue = "0")
-                                               @PositiveOrZero Integer from,
-                                               @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+                                               @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                               @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/items' на получение всех вещей владельца с id={}", ownerId);
 
@@ -67,9 +63,8 @@ public class ItemController {
 
     @GetMapping("/search")
     public List<ItemShortDto> getItemsBySearchQuery(@RequestParam String text,
-                                                    @RequestParam(name = "from", defaultValue = "0")
-                                                    @PositiveOrZero Integer from,
-                                                    @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+                                                    @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                    @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/items/search' на поиск вещи с текстом={}", text);
 
@@ -79,7 +74,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader(USER_HEADER) Long userId,
                                     @PathVariable Long itemId,
-                                    @Valid @RequestBody CommentShortDto commentShortDto) {
+                                    @RequestBody CommentShortDto commentShortDto) {
 
         log.info("POST-запрос: '/{itemId}/comment' на создание комментария" +
                 " пользователем с id={} для вещи с id={}, текст комментария:{}", userId, itemId, commentShortDto);

@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -52,8 +50,8 @@ public class BookingController {
     @GetMapping
     public List<BookingDtoResponse> getBookingsByCurrentUser(
             @RequestHeader(USER_HEADER) Long userId, @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+            @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос '/bookings' бронирований пользователя с id:{}, state:{}", userId, state);
 
@@ -63,8 +61,8 @@ public class BookingController {
     @GetMapping("/owner")
     public List<BookingDtoResponse> getBookingsFortUserItems(
             @RequestHeader(USER_HEADER) Long ownerId, @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
-            @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+            @RequestParam(name = "from", defaultValue = "0") Integer from,
+            @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос '/bookings/owner' ownerID:{}, state:{},", ownerId, state);
 

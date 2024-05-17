@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @RestController
@@ -34,9 +31,8 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestResponseDto> getRequestsByOwner(@RequestHeader(USER_HEADER) Long userId,
-                                                       @RequestParam(name = "from", defaultValue = "0")
-                                                       @PositiveOrZero Integer from,
-                                                       @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+                                                       @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                       @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/requests' на получение запросов пользователем с id={}", userId);
 
@@ -45,8 +41,8 @@ public class ItemRequestController {
 
     @GetMapping("/all")
     public List<ItemRequestResponseDto> getAllRequests(@RequestHeader(USER_HEADER) Long userId,
-                                                       @RequestParam(name = "from", defaultValue = "0") @PositiveOrZero Integer from,
-                                                       @RequestParam(name = "size", defaultValue = "10") @Positive Integer size) {
+                                                       @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                       @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/requests/all' на получение всех запросов " +
                 "пользователем с id={} по {} запросов на странице", userId, size);

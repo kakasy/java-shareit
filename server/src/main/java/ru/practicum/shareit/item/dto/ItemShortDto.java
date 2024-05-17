@@ -4,13 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.marker.Create;
-import ru.practicum.shareit.marker.Update;
-
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @AllArgsConstructor
 @Builder
@@ -20,16 +13,10 @@ public class ItemShortDto {
 
     private Long id;
 
-
-   // @Size(groups = {Create.class, Update.class}, max = 255)
-   // @NotBlank(groups = Create.class, message = "Имя не может быть пустым")
     private String name;
 
-    //@Size(groups = {Create.class, Update.class}, max = 512)
-    //@NotBlank(groups = Create.class, message = "Описание не может быть пустым")
     private String description;
 
-    //@NotNull(groups = Create.class)
     private Boolean available;
 
     private Long requestId;
