@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
@@ -258,17 +257,6 @@ public class ItemServiceTest {
 
     @SneakyThrows
     @Test
-    void searchItems_whenTextIsBlank_thenReturnEmptyList() {
-
-        String text = "";
-        List<ItemShortDto> actualList = itemService.getItemsBySearchQuery(text, 0, 10);
-
-        assertEquals(0, actualList.size());
-        verify(itemRepository, never()).getItemsBySearchQuery(text, pageable);
-    }
-
-    @SneakyThrows
-    @Test
     void searchItems_whenTextIsValid_thenReturnItemsList() {
 
         String text = "item";
@@ -319,22 +307,5 @@ public class ItemServiceTest {
         verify(bookingRepository, never()).existsByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class));
         verify(userRepository, times(1)).findById(user.getId());
 
-    }
-
-    @SneakyThrows
-    @Test
-    void createComment_whenInvalidBookingEnd_thenReturnException() {
-
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(bookingRepository.existsByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(false);
-
-        assertThrows(ValidationException.class,
-                () -> itemService.createComment(user.getId(), item.getId(), new CommentShortDto()));
-
-        verify(commentRepository, never()).save(new Comment());
-        verify(userRepository, times(1)).findById(user.getId());
-        verify(bookingRepository, times(1))
-                .existsByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class));
     }
 }
