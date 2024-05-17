@@ -10,23 +10,19 @@ import org.springframework.boot.test.json.JsonContent;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @JsonTest
-public class UserDtoTest {
+public class UserBookingDtoTest {
     @Autowired
-    private JacksonTester<UserDto> json;
+    private JacksonTester<UserBookingDto> json;
 
     @SneakyThrows
     @Test
-    void testUserDto() {
-        UserDto userDto = UserDto.builder()
+    void testUserDtoForBooking() {
+        UserBookingDto dto = UserBookingDto.builder()
                 .id(1L)
-                .name("user")
-                .email("user@mail.ru")
                 .build();
 
-        JsonContent<UserDto> result = json.write(userDto);
+        JsonContent<UserBookingDto> result = json.write(dto);
 
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("user");
-        assertThat(result).extractingJsonPathStringValue("$.email").isEqualTo("user@mail.ru");
     }
 }

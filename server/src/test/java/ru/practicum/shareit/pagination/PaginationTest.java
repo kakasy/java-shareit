@@ -8,7 +8,6 @@ import org.springframework.data.domain.Sort;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PaginationTest {
-
     private static final Sort CREATED_DESC = Sort.by(Sort.Direction.DESC, "created");
 
     @Test
