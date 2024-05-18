@@ -46,7 +46,7 @@ public class UserServiceTest {
 
         Mockito.when(userRepository.save(UserMapper.toUser(userDtoToSave))).thenReturn(savedUser);
 
-        UserDto actualUser = userService.createUserDto(userDtoToSave);
+        UserDto actualUser = userService.createUser(userDtoToSave);
 
         assertEquals(userDtoToSave, actualUser);
         Mockito.verify(userRepository).save(UserMapper.toUser(userDtoToSave));
@@ -69,7 +69,7 @@ public class UserServiceTest {
                 .email("old@mail.ru")
                 .build();
 
-        UserDto actualUserDto = userService.updateUserDto(newUser, userId);
+        UserDto actualUserDto = userService.updateUserById(userId, newUser);
         assertEquals(newUser, actualUserDto);
 
         verify(userRepository).save(userArgumentCaptor.capture());
@@ -87,7 +87,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> userService.getUserDtoById(userId));
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserById(userId));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(0)).save(user1);
 
@@ -106,7 +106,7 @@ public class UserServiceTest {
                 .email("")
                 .build();
 
-        userService.updateUserDto(updatedUser, userId);
+        userService.updateUserById(userId, updatedUser);
 
         verify(userRepository).save(userArgumentCaptor.capture());
         User actual = userArgumentCaptor.getValue();
@@ -123,7 +123,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(value));
 
-        UserDto actual = userService.getUserDtoById(userId);
+        UserDto actual = userService.getUserById(userId);
 
         assertEquals(UserMapper.toUserDto(value), actual);
         verify(userRepository, times(1)).findById(userId);
@@ -136,7 +136,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> userService.getUserDtoById(userId));
+        assertThrows(EntityNotFoundException.class, () -> userService.getUserById(userId));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        userService.deleteUserDto(userId);
+        userService.deleteUserById(userId);
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).deleteById(userId);
@@ -185,7 +185,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> userService.deleteUserDto(userId));
+        assertThrows(EntityNotFoundException.class, () -> userService.deleteUserById(userId));
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(0)).deleteById(userId);
 

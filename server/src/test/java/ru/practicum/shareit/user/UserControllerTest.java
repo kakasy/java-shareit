@@ -70,7 +70,7 @@ public class UserControllerTest {
 
         List<UserDto> users = List.of(firstUser, secondUser);
 
-        when(userService.getUsersDto()).thenReturn(users);
+        when(userService.getAllUsers()).thenReturn(users);
 
         mockMvc.perform(get("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -85,7 +85,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$[1].name", is(secondUser.getName())))
                 .andExpect(jsonPath("$[1].email", is(secondUser.getEmail())));
 
-        verify(userService, times(1)).getUsersDto();
+        verify(userService, times(1)).getAllUsers();
     }
 
 
@@ -95,7 +95,7 @@ public class UserControllerTest {
 
         List<UserDto> users = List.of();
 
-        when(userService.getUsersDto()).thenReturn(users);
+        when(userService.getAllUsers()).thenReturn(users);
 
         mockMvc.perform(get("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(userService, times(1)).getUsersDto();
+        verify(userService, times(1)).getAllUsers();
     }
 
 
@@ -114,7 +114,7 @@ public class UserControllerTest {
 
         UserDto userToCreate = firstUser;
 
-        when(userService.createUserDto(userToCreate)).thenReturn(userToCreate);
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
 
         String result = mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +129,7 @@ public class UserControllerTest {
                 .getContentAsString();
 
         assertEquals(objectMapper.writeValueAsString(userToCreate), result);
-        verify(userService, times(1)).createUserDto(userToCreate);
+        verify(userService, times(1)).createUser(userToCreate);
     }
 
     @SneakyThrows
@@ -141,7 +141,7 @@ public class UserControllerTest {
         firstUser.setName("newName");
         firstUser.setEmail("new@mail.ru");
 
-        when(userService.updateUserDto(userToUpdate, 1L)).thenReturn(userToUpdate);
+        when(userService.updateUserById(1L, userToUpdate)).thenReturn(userToUpdate);
 
         String result = mockMvc.perform(patch("/users/{userId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -155,7 +155,7 @@ public class UserControllerTest {
                 .getContentAsString();
 
         assertEquals(objectMapper.writeValueAsString(userToUpdate), result);
-        verify(userService, times(1)).updateUserDto(userToUpdate, 1L);
+        verify(userService, times(1)).updateUserById(1L, userToUpdate);
     }
 
     @SneakyThrows
@@ -164,7 +164,7 @@ public class UserControllerTest {
 
         Long userId = 1L;
 
-        when(userService.getUserDtoById(userId)).thenReturn(firstUser);
+        when(userService.getUserById(userId)).thenReturn(firstUser);
 
         String result = mockMvc.perform(get("/users/{usersId}", userId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -179,7 +179,7 @@ public class UserControllerTest {
                 .getContentAsString();
 
         assertEquals(objectMapper.writeValueAsString(firstUser), result);
-        verify(userService, times(1)).getUserDtoById(userId);
+        verify(userService, times(1)).getUserById(userId);
     }
 
 
@@ -192,6 +192,6 @@ public class UserControllerTest {
         mockMvc.perform(delete("/users/{userId}", userId))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).deleteUserDto(userId);
+        verify(userService, times(1)).deleteUserById(userId);
     }
 }

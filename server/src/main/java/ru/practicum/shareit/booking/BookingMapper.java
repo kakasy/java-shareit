@@ -13,6 +13,28 @@ import ru.practicum.shareit.user.UserMapper;
 @UtilityClass
 public class BookingMapper {
 
+    public BookingDtoResponse toBookingDtoResponse(Booking booking) {
+        return BookingDtoResponse.builder()
+                .id(booking.getId())
+                .start(booking.getStart())
+                .end(booking.getEnd())
+                .item(ItemMapper.toItemBookingDto(booking.getItem()))
+                .booker(UserMapper.toUserBookingDto(booking.getBooker()))
+                .status(booking.getStatus())
+                .build();
+    }
+
+    public Booking toBooking(BookingDtoRequest bookingDto, Item item, User user, BookingStatus status) {
+
+        return Booking.builder()
+                .start(bookingDto.getStart())
+                .end(bookingDto.getEnd())
+                .item(item)
+                .booker(user)
+                .status(status)
+                .build();
+    }
+
     public BookingItemDto toBookingItemDto(Booking booking) {
 
         if (booking == null) {
@@ -22,29 +44,6 @@ public class BookingMapper {
         return BookingItemDto.builder()
                 .id(booking.getId())
                 .bookerId(booking.getBooker().getId())
-                .build();
-    }
-
-    public Booking toBooking(BookingDtoRequest bookingDtoRequest, Item item, User user, BookingStatus bookingStatus) {
-
-        return Booking.builder()
-                .start(bookingDtoRequest.getStart())
-                .end(bookingDtoRequest.getEnd())
-                .item(item)
-                .booker(user)
-                .status(bookingStatus)
-                .build();
-    }
-
-    public BookingDtoResponse toBookingDtoResponse(Booking booking) {
-
-        return BookingDtoResponse.builder()
-                .id(booking.getId())
-                .start(booking.getStart())
-                .end(booking.getEnd())
-                .item(ItemMapper.toItemBookingDto(booking.getItem()))
-                .booker(UserMapper.toUserBookingDto(booking.getBooker()))
-                .status(booking.getStatus())
                 .build();
     }
 

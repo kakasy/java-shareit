@@ -12,10 +12,10 @@ import ru.practicum.shareit.item.dto.ItemResponseDto;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
 @Validated
+@RequiredArgsConstructor
 public class ItemController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
@@ -23,48 +23,44 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemShortDto create(@RequestHeader(USER_HEADER) Long ownerId,
-                               @RequestBody ItemShortDto itemDto) {
+    public ItemShortDto createItem(@RequestHeader(USER_HEADER) Long ownerId, @RequestBody ItemShortDto item) {
 
         log.info("POST-запрос: '/items' на создание вещи владельцем с id={}", ownerId);
 
-        return itemService.createItemDto(itemDto, ownerId);
+        return itemService.createItem(item, ownerId);
     }
 
     @PatchMapping("/{itemId}")
-    public ItemShortDto update(@RequestHeader(USER_HEADER) Long ownerId,
-                               @RequestBody ItemShortDto itemDto,
-                               @PathVariable Long itemId) {
+    public ItemShortDto updateItem(@RequestHeader(USER_HEADER) Long ownerId, @PathVariable Long itemId,
+                                   @RequestBody ItemShortDto item) {
 
         log.info("PATCH-запрос: '/items/{itemId}' на обновление вещи с id={}", itemId);
 
-        return itemService.updateItemDto(itemDto, ownerId, itemId);
+        return itemService.updateItem(item, ownerId, itemId);
     }
 
-
     @GetMapping("/{itemId}")
-    public ItemResponseDto getItemDtoById(@RequestHeader(USER_HEADER) Long userId,
-                                          @PathVariable Long itemId) {
+    public ItemResponseDto getItemById(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long itemId) {
 
         log.info("GET-запрос: '/items/{itemId}' на получение вещи с id={}", itemId);
 
-        return itemService.getItemDtoById(itemId, userId);
+        return itemService.getItemById(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemResponseDto> getOwnerItems(@RequestHeader(USER_HEADER) Long ownerId,
-                                               @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                               @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public List<ItemResponseDto> getItemsByUser(@RequestHeader(USER_HEADER) Long ownerId,
+                                        @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                        @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/items' на получение всех вещей владельца с id={}", ownerId);
 
-        return itemService.getAllOwnerItems(ownerId, from, size);
+        return itemService.getItemsByUser(ownerId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemShortDto> getItemsBySearchQuery(@RequestParam String text,
-                                                    @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                    @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public List<ItemShortDto> searchItems(@RequestParam String text,
+                                          @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                          @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/items/search' на поиск вещи с текстом={}", text);
 
@@ -72,13 +68,13 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestHeader(USER_HEADER) Long userId,
-                                    @PathVariable Long itemId,
-                                    @RequestBody CommentShortDto commentShortDto) {
+    public CommentDto createComment(@PathVariable Long itemId,
+                                            @RequestHeader(USER_HEADER) Long userId,
+                                            @RequestBody CommentShortDto comment) {
 
         log.info("POST-запрос: '/{itemId}/comment' на создание комментария" +
-                " пользователем с id={} для вещи с id={}, текст комментария:{}", userId, itemId, commentShortDto);
+                " пользователем с id={} для вещи с id={}, текст комментария:{}", userId, itemId, comment);
 
-        return itemService.createComment(userId, itemId, commentShortDto);
+        return itemService.createComment(itemId, userId, comment);
     }
 }

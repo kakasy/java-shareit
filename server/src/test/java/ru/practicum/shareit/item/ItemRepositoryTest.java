@@ -49,7 +49,7 @@ public class ItemRepositoryTest {
 
     @Test
     void search() {
-        List<Item> actualItems = itemRepository.getItemsBySearchQuery("item",
+        List<Item> actualItems = itemRepository.search("item",
                 Pagination.withoutSort(0, 10));
 
         assertEquals(1, actualItems.size());

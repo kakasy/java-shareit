@@ -12,17 +12,16 @@ import java.util.List;
 @UtilityClass
 public class RequestMapper {
 
-
-    public ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User user) {
+    ItemRequest toItemRequest(ItemRequestDto request, User user) {
 
         return ItemRequest.builder()
                 .requestor(user)
-                .description(itemRequestDto.getDescription())
                 .created(LocalDateTime.now())
+                .description(request.getDescription())
                 .build();
     }
 
-    public ItemRequestResponseDto toItemRequestResponseDto(ItemRequest request, List<ItemForRequestDto> items) {
+    ItemRequestResponseDto toItemRequestResponseDto(ItemRequest request, List<ItemForRequestDto> items) {
 
         return ItemRequestResponseDto.builder()
                 .id(request.getId())

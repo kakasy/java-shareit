@@ -25,7 +25,6 @@ public enum BookingState {
                 return BookingState.WAITING;
             case "REJECTED":
                 return BookingState.REJECTED;
-            case "APPROVED":
             default:
                 throw new BookingException(String.format("Unknown state: %s", state));
         }

@@ -32,7 +32,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleAlreadyExistException(final IllegalArgumentException e) {
+    public ErrorResponse handleAlreadyExistException(final RuntimeException e) {
 
         log.debug("Получен статус 409 Conflict {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());

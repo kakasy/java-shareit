@@ -91,7 +91,7 @@ public class ItemControllerTest {
     @Test
     void createItem_whenValidItem_thenReturnItem() {
 
-        when(itemService.createItemDto(any(ItemShortDto.class), anyLong())).thenReturn(itemShortDto);
+        when(itemService.createItem(any(ItemShortDto.class), anyLong())).thenReturn(itemShortDto);
 
         String result = mockMvc.perform(post("/items")
                         .content(objectMapper.writeValueAsString(itemRequest))
@@ -112,7 +112,7 @@ public class ItemControllerTest {
 
         Long itemId = 1L;
 
-        when(itemService.updateItemDto(any(ItemShortDto.class), anyLong(), anyLong())).thenReturn(itemShortDto);
+        when(itemService.updateItem(any(ItemShortDto.class), anyLong(), anyLong())).thenReturn(itemShortDto);
 
 
         String result = mockMvc.perform(patch("/items/{itemId}", itemId)
@@ -133,7 +133,7 @@ public class ItemControllerTest {
     void getItem_whenValidId_thenReturnItem() {
 
         Long itemId = 1L;
-        when(itemService.getItemDtoById(anyLong(), anyLong())).thenReturn(itemResponseDto);
+        when(itemService.getItemById(anyLong(), anyLong())).thenReturn(itemResponseDto);
 
         String result = mockMvc.perform(get("/items/{itemId}", itemId)
                         .content(objectMapper.writeValueAsString(itemRequest))
@@ -154,7 +154,7 @@ public class ItemControllerTest {
 
         List<ItemResponseDto> items = List.of();
 
-        when(itemService.getAllOwnerItems(anyLong(), anyInt(), anyInt())).thenReturn(items);
+        when(itemService.getItemsByUser(anyLong(), anyInt(), anyInt())).thenReturn(items);
 
 
         String result = mockMvc.perform(get("/items?from=0&size=10")
@@ -177,7 +177,7 @@ public class ItemControllerTest {
 
         List<ItemResponseDto> items = List.of(itemResponseDto);
 
-        when(itemService.getAllOwnerItems(anyLong(), anyInt(), anyInt())).thenReturn(items);
+        when(itemService.getItemsByUser(anyLong(), anyInt(), anyInt())).thenReturn(items);
 
         String result = mockMvc.perform(get("/items?from=0&size=10")
                         .content(objectMapper.writeValueAsString(items))

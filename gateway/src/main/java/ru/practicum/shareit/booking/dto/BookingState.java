@@ -4,22 +4,16 @@ import java.util.Optional;
 
 public enum BookingState {
 
-//    ALL,
-//    WAITING,
-//    CURRENT,
-//    APPROVED,
-//    CANCELED,
-//    PAST,
-//    FUTURE,
-//    REJECTED,
-//    UNSUPPORTED_STATUS;
-
-
     ALL,
+
     CURRENT,
+
     FUTURE,
+
     PAST,
+
     REJECTED,
+
     WAITING;
 
     public static Optional<BookingState> from(String stringState) {

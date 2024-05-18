@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -37,84 +39,71 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    public ItemShortDto createItemDto(ItemShortDto itemShortDto, Long ownerId) {
+    public ItemShortDto createItem(ItemShortDto item, Long userId) {
 
-        User itemOwner = userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        String.format("Пользователь с id=%d не существует", ownerId)));
-
-        if (itemShortDto.getRequestId() != null) {
-            ItemRequest itemRequest = requestRepository.findById(itemShortDto.getRequestId())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            String.format("Запрос с id=%d не существует", itemShortDto.getRequestId())));
+        User user = checkUserId(userId);
+        if (item.getRequestId() != null) {
+            checkRequestId(item.getRequestId());
         }
-
-        Item createdItem = itemRepository.save(ItemMapper.toItem(itemShortDto, itemOwner));
-
+        Item createdItem = itemRepository.save(ItemMapper.toItem(item, user));
+        log.info("Пользователь с id {} создал вещь {}", userId, createdItem);
         return ItemMapper.toItemShortDto(createdItem);
 
     }
 
     @Override
-    public ItemShortDto updateItemDto(ItemShortDto itemShortDto, Long ownerId, Long itemId) {
+    public ItemShortDto updateItem(ItemShortDto item, Long ownerId, Long itemId) {
 
-        Item itemToUpdate = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
-
-        if (!itemToUpdate.getOwner().getId().equals(ownerId)) {
-            throw new EntityNotFoundException("У пользователя такой вещи не существует");
+        Item expectedItem = checkItemId(itemId);
+        if (!expectedItem.getOwner().getId().equals(ownerId)) {
+            throw new EntityNotFoundException(
+                    String.format("Пользователь с id %d не является владельцем вещи с id %d", ownerId, itemId));
         }
-
-        if (itemShortDto.getName() != null && !itemShortDto.getName().isBlank()) {
-            itemToUpdate.setName(itemShortDto.getName());
+        if (item.getName() != null && !item.getName().isBlank()) {
+            expectedItem.setName(item.getName());
         }
-
-        if (itemShortDto.getDescription() != null && !itemShortDto.getDescription().isBlank()) {
-            itemToUpdate.setDescription(itemShortDto.getDescription());
+        if (item.getDescription() != null && !item.getDescription().isBlank()) {
+            expectedItem.setDescription(item.getDescription());
         }
-
-        if (itemShortDto.getAvailable() != null) {
-            itemToUpdate.setAvailable(itemShortDto.getAvailable());
+        if (item.getAvailable() != null) {
+            expectedItem.setAvailable(item.getAvailable());
         }
+        itemRepository.save(expectedItem);
+        log.info("Пользователь с id {} обновил вещь с id {}", ownerId, itemId);
 
-        itemRepository.save(itemToUpdate);
-
-        return ItemMapper.toItemShortDto(itemToUpdate);
+        return ItemMapper.toItemShortDto(expectedItem);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ItemResponseDto getItemDtoById(Long itemId, Long userId) {
+    public ItemResponseDto getItemById(Long itemId, Long userId) {
 
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id=%d не найдена", itemId)));
-
-        List<CommentDto> comments = commentRepository
-                .findAllByItemId(itemId)
+        Item item = checkItemId(itemId);
+        List<CommentDto> comments = commentRepository.findAllByItemId(itemId)
                 .stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
 
         if (item.getOwner().getId().equals(userId)) {
+            log.info("Получена вещь с id {}", itemId);
             return ItemMapper.toItemResponseDto(item, comments);
         }
-        item.setNextBooking(null);
         item.setLastBooking(null);
+        item.setNextBooking(null);
+        log.info("Получена вещь с id {}", itemId);
 
         return ItemMapper.toItemResponseDto(item, comments);
-
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemResponseDto> getAllOwnerItems(Long ownerId, Integer from, Integer size) {
+    public List<ItemResponseDto> getItemsByUser(Long ownerId, Integer from, Integer size) {
 
         Map<Long, Item> itemsMap = itemRepository.findAllItemsByOwnerId(ownerId, Pagination.withoutSort(from, size))
                 .stream()
                 .collect(Collectors.toMap(Item::getId, Function.identity()));
 
-
-        Map<Long, List<Comment>> commentsMap = commentRepository.findAllByItemIdIn(new ArrayList<>(itemsMap.keySet()))
+        Map<Long, List<Comment>> commentsMap = commentRepository.findAllByItemIdIn(itemsMap.keySet())
                 .stream()
                 .collect(Collectors.groupingBy(Comment::getItemId));
 
@@ -126,38 +115,53 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemShortDto> getItemsBySearchQuery(String text, Integer from, Integer size) {
+    public List<ItemShortDto> getItemsBySearchQuery(String query, Integer from, Integer size) {
 
-        return itemRepository.getItemsBySearchQuery(text, Pagination.withoutSort(from, size))
+        List<ItemShortDto> foundItems = itemRepository.search(query, Pagination.withoutSort(from, size))
                 .stream()
-                .map(ItemMapper::toItemShortDto)
-                .collect(Collectors.toList());
+                .map(ItemMapper::toItemShortDto).collect(Collectors.toList());
+
+        log.info("Получен список из {} вещей по запросу '{}'", foundItems.size(), query);
+
+        return foundItems;
     }
 
     @Override
-    public CommentDto createComment(Long userId, Long itemId, CommentShortDto commentShortDto) {
+    public CommentDto createComment(Long itemId, Long userId, CommentShortDto commentDto) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id=%d не существует", userId)));
-
-        Boolean isBookings = bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
-
-        if (!isBookings) {
-            throw new BookingException("Нет бронирований вещей");
+        User user = checkUserId(userId);
+        if (!bookingRepository.existsByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now())) {
+            throw new BookingException("Нельзя оставить комментарий");
         }
-
-        Comment comment = commentRepository.save(CommentMapper.toComment(commentShortDto, user, itemId));
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, user, itemId));
+        log.info("Получен комментарий от пользователя {}", userId);
 
         return CommentMapper.toCommentDto(comment);
     }
 
+    private User checkUserId(Long userId) {
+
+        return userRepository.findById(userId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Пользователь с id %d не существует", userId)));
+    }
+
+    private Item checkItemId(Long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Вещь с id %d не существует", itemId)));
+    }
+
     private ItemResponseDto addComments(Item item, List<Comment> comments) {
+
         List<CommentDto> commentList = comments
-                .stream()
-                .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList());
+                .stream().map(CommentMapper::toCommentDto).collect(Collectors.toList());
 
         return ItemMapper.toItemResponseDto(item, commentList);
+    }
+
+    private ItemRequest checkRequestId(Long requestId) {
+
+        return requestRepository.findById(requestId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Запрос с id %d не существует", requestId)));
     }
 
 }

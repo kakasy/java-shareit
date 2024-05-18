@@ -10,29 +10,29 @@ import ru.practicum.shareit.request.dto.ItemRequestResponseDto;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
-@Slf4j
 @RequestMapping(path = "/requests")
+@Slf4j
 @Validated
+@RequiredArgsConstructor
 public class ItemRequestController {
-
-    private static final String USER_HEADER = "X-Sharer-User-Id";
 
     private final RequestService requestService;
 
+    private static final String USER_HEADER = "X-Sharer-User-Id";
+
     @PostMapping
-    public ItemRequestResponseDto createRequest(@RequestHeader(USER_HEADER) Long userId,
-                                                @RequestBody ItemRequestDto itemRequestDto) {
+    public ItemRequestResponseDto createItemRequest(@RequestHeader(USER_HEADER) Long userId,
+                                                    @RequestBody ItemRequestDto requestDto) {
 
         log.info("POST-запрос: '/requests' на создание запроса пользователем с id={}", userId);
 
-        return requestService.createRequest(userId, itemRequestDto);
+        return requestService.createRequest(userId, requestDto);
     }
 
     @GetMapping
-    public List<ItemRequestResponseDto> getRequestsByOwner(@RequestHeader(USER_HEADER) Long userId,
-                                                       @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                       @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public List<ItemRequestResponseDto> getRequests(@RequestHeader(USER_HEADER) Long userId,
+                                                    @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                    @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос: '/requests' на получение запросов пользователем с id={}", userId);
 
@@ -51,7 +51,8 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestResponseDto getRequestsById(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long requestId) {
+    public ItemRequestResponseDto getRequestsById(@RequestHeader(USER_HEADER) Long userId,
+                                                  @PathVariable Long requestId) {
 
         log.info("GET-запрос: '/requests/{requestId}' на получение запроса с id:{}  пользователем с id={}",
                 requestId, userId);

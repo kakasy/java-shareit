@@ -246,7 +246,7 @@ public class BookingServiceTest {
         when(bookingRepository.findAllByBookerId(anyLong(), any(PageRequest.class))).thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "ALL", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "ALL", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -267,7 +267,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "CURRENT", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "CURRENT", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -285,7 +285,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "PAST", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "PAST", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -305,7 +305,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "FUTURE", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "FUTURE", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -324,7 +324,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "WAITING", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "WAITING", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -342,7 +342,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsByCurrentUser(user.getId(), "REJECTED", 0, 10);
+                bookingService.getSortBookingByUser(user.getId(), "REJECTED", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -353,7 +353,7 @@ public class BookingServiceTest {
     void getSortBookingByUser_whenInvalidStatus_thenExceptionThrown() {
 
         assertThrows(BookingException.class,
-                () -> bookingService.getBookingsByCurrentUser(user.getId(),
+                () -> bookingService.getSortBookingByUser(user.getId(),
                         "UNSUPPORTED_STATUS", 0, 10));
 
 
@@ -366,7 +366,7 @@ public class BookingServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> bookingService.getBookingsByCurrentUser(user.getId(), "REJECTED", 0, 10));
+                () -> bookingService.getSortBookingByUser(user.getId(), "REJECTED", 0, 10));
 
 
         verify(userRepository, times(1)).findById(user.getId());
@@ -385,7 +385,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "ALL", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "ALL", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -400,7 +400,7 @@ public class BookingServiceTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> bookingService.getBookingsByCurrentUser(owner.getId(), "REJECTED", 0, 10));
+                () -> bookingService.getSortBookingByOwner(owner.getId(), "REJECTED", 0, 10));
 
 
         verify(userRepository, times(1)).findById(owner.getId());
@@ -419,7 +419,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "ALL", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "ALL", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -439,7 +439,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "CURRENT", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "CURRENT", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -457,7 +457,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "PAST", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "PAST", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -475,7 +475,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "FUTURE", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "FUTURE", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -493,7 +493,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "WAITING", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "WAITING", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -511,7 +511,7 @@ public class BookingServiceTest {
                 .thenReturn(bookings);
 
         List<BookingDtoResponse> actualList =
-                bookingService.getBookingsForUserItems(owner.getId(), "REJECTED", 0, 10);
+                bookingService.getSortBookingByOwner(owner.getId(), "REJECTED", 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(BookingMapper.toBookingDtoResponse(booking), actualList.get(0));
@@ -521,7 +521,7 @@ public class BookingServiceTest {
     @Test
     void getSortBookingByOwner_whenInvalidStatus_thenExceptionThrown() {
 
-        assertThrows(BookingException.class, () -> bookingService.getBookingsForUserItems(owner.getId(),
+        assertThrows(BookingException.class, () -> bookingService.getSortBookingByOwner(owner.getId(),
                 "UNSUPPORTED_STATUS", 0, 10));
 
         verifyNoInteractions(bookingRepository);

@@ -10,10 +10,10 @@ import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
+@RequestMapping("/bookings")
 @Slf4j
-@RequestMapping(path = "/bookings")
 @Validated
+@RequiredArgsConstructor
 public class BookingController {
 
     private static final String USER_HEADER = "X-Sharer-User-Id";
@@ -21,17 +21,18 @@ public class BookingController {
 
 
     @PostMapping
-    public BookingDtoResponse create(@RequestHeader(USER_HEADER) Long userId,
-                                     @RequestBody BookingDtoRequest bookingDtoRequest) {
+    public BookingDtoResponse createBooking(@RequestHeader(USER_HEADER) Long userId,
+                                            @RequestBody BookingDtoRequest bookingDto) {
 
         log.info("POST-запрос '/bookings' на создание запроса на бронирование: {} пользователем с id: {}",
-                bookingDtoRequest, userId);
-        return bookingService.createBooking(userId, bookingDtoRequest);
+                bookingDto, userId);
+
+        return bookingService.createBooking(userId, bookingDto);
     }
 
     @PatchMapping("/{bookingId}")
-    public BookingDtoResponse approve(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long bookingId,
-                                      @RequestParam Boolean approved) {
+    public BookingDtoResponse approvedBooking(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long bookingId,
+                                              @RequestParam Boolean approved) {
 
         log.info("PATCH-запрос '/bookings/{bookingId}' " +
                 "на подтверждение/отклонение бронирования: {} пользователем с id: {}", bookingId, userId);
@@ -39,7 +40,8 @@ public class BookingController {
     }
 
     @GetMapping("/{bookingId}")
-    public BookingDtoResponse getBookingById(@RequestHeader(USER_HEADER) Long userId, @PathVariable Long bookingId) {
+    public BookingDtoResponse getBookingById(@RequestHeader(USER_HEADER) Long userId,
+                                             @PathVariable Long bookingId) {
 
         log.info("GET-запрос '/bookings/{bookingId}' на получение данных " +
                 "о бронировании с bookingId: {} пользователем с id: {}", bookingId, userId);
@@ -48,24 +50,24 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<BookingDtoResponse> getBookingsByCurrentUser(
-            @RequestHeader(USER_HEADER) Long userId, @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public List<BookingDtoResponse> getSortBookingByUser(@RequestHeader(USER_HEADER) Long userId,
+                                                         @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                         @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                         @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
         log.info("GET-запрос '/bookings' бронирований пользователя с id:{}, state:{}", userId, state);
 
-        return bookingService.getBookingsByCurrentUser(userId, state, from, size);
+        return bookingService.getSortBookingByUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingDtoResponse> getBookingsFortUserItems(
-            @RequestHeader(USER_HEADER) Long ownerId, @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(name = "from", defaultValue = "0") Integer from,
-            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+    public List<BookingDtoResponse> getSortBookingByOwner(@RequestHeader(USER_HEADER) Long userId,
+                                                          @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                          @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                          @RequestParam(name = "size", defaultValue = "10") Integer size) {
 
-        log.info("GET-запрос '/bookings/owner' ownerID:{}, state:{},", ownerId, state);
+        log.info("GET-запрос '/bookings/owner' ownerID:{}, state:{},", userId, state);
 
-        return bookingService.getBookingsForUserItems(ownerId, state, from, size);
+        return bookingService.getSortBookingByOwner(userId, state, from, size);
     }
 }

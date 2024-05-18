@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface RequestService {
 
-    ItemRequestResponseDto createRequest(Long userId, ItemRequestDto itemRequestDto);
+    ItemRequestResponseDto createRequest(Long userId, ItemRequestDto requestDto);
 
     List<ItemRequestResponseDto> getRequestsByOwner(Long ownerId, Integer from, Integer size);
 

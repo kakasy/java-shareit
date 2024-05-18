@@ -25,8 +25,10 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -95,7 +97,7 @@ public class ItemServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRepository.save(ItemMapper.toItem(itemShortDto, user))).thenReturn(item);
 
-        ItemShortDto actual = itemService.createItemDto(new ItemShortDto(), user.getId());
+        ItemShortDto actual = itemService.createItem(new ItemShortDto(), user.getId());
 
         assertEquals(ItemMapper.toItemShortDto(item), actual);
         verify(userRepository, times(1)).findById(1L);
@@ -110,7 +112,7 @@ public class ItemServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> itemService.createItemDto(itemShortDto, userId));
+        assertThrows(EntityNotFoundException.class, () -> itemService.createItem(itemShortDto, userId));
         verify(itemRepository, never()).save(ItemMapper.toItem(itemShortDto, user));
         verify(requestRepository, never()).findById(itemShortDto.getRequestId());
         verify(userRepository, times(1)).findById(userId);
@@ -128,7 +130,7 @@ public class ItemServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(requestRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> itemService.createItemDto(itemShortDto1, userId));
+        assertThrows(EntityNotFoundException.class, () -> itemService.createItem(itemShortDto1, userId));
         verify(itemRepository, never()).save(ItemMapper.toItem(itemShortDto1, user));
         verify(userRepository, times(1)).findById(userId);
         verify(requestRepository, times(1)).findById(itemShortDto1.getRequestId());
@@ -148,7 +150,7 @@ public class ItemServiceTest {
                 .available(true)
                 .build();
 
-        ItemShortDto actual = itemService.updateItemDto(itemShortDto1, user.getId(), item.getId());
+        ItemShortDto actual = itemService.updateItem(itemShortDto1, user.getId(), item.getId());
 
         assertEquals(itemShortDto1, actual);
         verify(itemRepository).save(argumentCaptor.capture());
@@ -167,7 +169,7 @@ public class ItemServiceTest {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> itemService.updateItemDto(itemShortDto, user.getId(), item.getId()));
+                () -> itemService.updateItem(itemShortDto, user.getId(), item.getId()));
 
         verify(itemRepository, never()).save(ItemMapper.toItem(itemShortDto, user));
         verify(requestRepository, never()).findById(itemShortDto.getRequestId());
@@ -187,7 +189,7 @@ public class ItemServiceTest {
                 .available(null)
                 .build();
 
-        ItemShortDto actualItemDto = itemService.updateItemDto(newItem, user.getId(), item.getId());
+        ItemShortDto actualItemDto = itemService.updateItem(newItem, user.getId(), item.getId());
         assertNotEquals(newItem, actualItemDto);
 
         verify(itemRepository).save(argumentCaptor.capture());
@@ -204,7 +206,7 @@ public class ItemServiceTest {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of());
 
-        ItemResponseDto actualItem = itemService.getItemDtoById(item.getId(), user.getId());
+        ItemResponseDto actualItem = itemService.getItemById(item.getId(), user.getId());
 
         assertEquals(ItemMapper.toItemResponseDto(item, List.of()), actualItem);
         verify(itemRepository, times(1)).findById(user.getId());
@@ -218,7 +220,7 @@ public class ItemServiceTest {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of());
 
-        ItemResponseDto actualItem = itemService.getItemDtoById(item.getId(), 99L);
+        ItemResponseDto actualItem = itemService.getItemById(item.getId(), 99L);
 
         assertEquals(ItemMapper.toItemResponseDto(item, List.of()), actualItem);
         verify(itemRepository, times(1)).findById(user.getId());
@@ -229,13 +231,14 @@ public class ItemServiceTest {
     @Test
     void getItemsByUser_whenValidUserId_thenReturnItemList() {
 
-        List<Item> items = List.of(item);
+        List<Item> items = new ArrayList<>();
+        items.add(item);
 
         when(itemRepository.findAllItemsByOwnerId(user.getId(), pageable)).thenReturn(items);
 
-        when(commentRepository.findAllByItemIdIn(anyList())).thenReturn(List.of());
+        when(commentRepository.findAllByItemIdIn(anySet())).thenReturn(Set.of());
 
-        List<ItemResponseDto> actualList = itemService.getAllOwnerItems(user.getId(), 0, 10);
+        List<ItemResponseDto> actualList = itemService.getItemsByUser(user.getId(), 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(ItemMapper.toItemResponseDto(item, List.of()), actualList.get(0));
@@ -248,7 +251,7 @@ public class ItemServiceTest {
 
         when(itemRepository.findById(item.getId())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> itemService.getItemDtoById(item.getId(), user.getId()));
+        assertThrows(EntityNotFoundException.class, () -> itemService.getItemById(item.getId(), user.getId()));
 
 
         verify(itemRepository, times(1)).findById(item.getId());
@@ -261,13 +264,13 @@ public class ItemServiceTest {
 
         String text = "item";
 
-        when(itemRepository.getItemsBySearchQuery("item", pageable)).thenReturn(List.of(item));
+        when(itemRepository.search("item", pageable)).thenReturn(List.of(item));
 
         List<ItemShortDto> actualList = itemService.getItemsBySearchQuery(text, 0, 10);
 
         assertEquals(1, actualList.size());
         assertEquals(ItemMapper.toItemShortDto(item), actualList.get(0));
-        verify(itemRepository, times(1)).getItemsBySearchQuery(text, pageable);
+        verify(itemRepository, times(1)).search(text, pageable);
     }
 
     @SneakyThrows

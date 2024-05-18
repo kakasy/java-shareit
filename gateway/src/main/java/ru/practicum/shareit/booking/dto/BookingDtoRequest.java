@@ -10,22 +10,18 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
-@Builder
 @StartBeforeEndDateValid
+@Data
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class BookingDtoRequest {
+
+    @FutureOrPresent
+    private LocalDateTime start;
+
+    private LocalDateTime end;
 
     @NotNull
     private Long itemId;
-
-    @FutureOrPresent
-    @NotNull
-    private LocalDateTime start;
-
-//    @Future
-//    @NotNull
-    private LocalDateTime end;
-
 }

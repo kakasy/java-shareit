@@ -151,7 +151,7 @@ public class BookingControllerTest {
 
         List<BookingDtoResponse> responseList = List.of(bookingDtoResponse);
 
-        when(bookingService.getBookingsByCurrentUser(anyLong(), anyString(), anyInt(), anyInt()))
+        when(bookingService.getSortBookingByUser(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(responseList);
 
         String result = mockMvc.perform(get("/bookings?state=ALL")
@@ -174,7 +174,7 @@ public class BookingControllerTest {
 
         List<BookingDtoResponse> responseList = List.of(bookingDtoResponse);
 
-        when(bookingService.getBookingsForUserItems(anyLong(), anyString(), anyInt(), anyInt()))
+        when(bookingService.getSortBookingByOwner(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenReturn(responseList);
 
         mockMvc.perform(get("/bookings/owner?state=ALL")
